@@ -879,7 +879,7 @@ const ICONMENU = {
   notes: [['새로운 메모', () => { const n = newNoteIn('notes'); nav.openTo([{ app: 'notes', v: 'main', p: {} }, { app: 'notes', v: 'list', p: { f: 'notes' } }, { app: 'notes', v: 'edit', p: { id: n.id } }]); }]],
   voice: [['새로운 녹음', () => nav.openTo([{ app: 'voice', v: 'main', p: {} }, { app: 'voice', v: 'rec', p: {} }])]],
   clock: [['알람', () => nav.openTo([{ app: 'clock', v: 'main', p: { tab: 'alarm' } }])], ['스톱워치', () => nav.openTo([{ app: 'clock', v: 'main', p: { tab: 'stop' } }])]],
-  insta: [['새 게시물', () => nav.openTo([{ app: 'insta', v: 'main', p: {} }, { app: 'insta', v: 'newpost', p: {} }])], ['메시지', () => nav.openTo([{ app: 'insta', v: 'main', p: {} }, { app: 'insta', v: 'dm', p: {} }])]],
+  insta: [['새 게시물', () => U.owner && nav.openTo([{ app: 'insta', v: 'main', p: {} }, { app: 'insta', v: 'newpost', p: {} }])], ['메시지', () => nav.openTo([{ app: 'insta', v: 'main', p: {} }, { app: 'insta', v: 'dm', p: {} }])]],
   contacts: [['새로운 연락처', () => nav.openTo([{ app: 'contacts', v: 'main', p: {} }, { app: 'contacts', v: 'form', p: {} }])]],
   gallery: [['보관함', () => nav.open('gallery')]],
 };
@@ -1792,13 +1792,13 @@ VIEWS['insta.comments'] = p => {
 
 function profileView(app) {
   const P = IGP(), hasS = storyState(null);
-  app.append(igTop([h('button', { class: 'ico', 'aria-label': '추가', onclick: () => actionSheet('만들기', [{ label: '게시물 올리기', fn: () => nav.push('insta', 'newpost', {}) }, { label: '스토리 올리기', fn: () => nav.push('insta', 'storynew', {}) }]) }, ic('plus', 26))], h('div', { class: 'igtitle l', text: P.username })));
+  app.append(igTop([h('button', { class: 'ico', 'aria-label': '추가', onclick: () => U.owner && actionSheet('만들기', [{ label: '게시물 올리기', fn: () => nav.push('insta', 'newpost', {}) }, { label: '스토리 올리기', fn: () => nav.push('insta', 'storynew', {}) }]) }, ic('plus', 26))], h('div', { class: 'igtitle l', text: P.username })));
   const stat = (n, l) => h('div', { class: 'stat' }, h('b', { text: fmtCount(n) }), h('span', { text: l }));
   const posts = S.ig.posts.filter(p => !p.by).sort(byNew);
   const sc = h('div', { class: 'scroll' },
     h('div', { class: 'phd' }, ringAvatar(P.avatar, P.username, hasS, 86, () => hasS ? nav.push('insta', 'story', { i: 0 }) : nav.push('insta', 'storynew', {})), h('div', { class: 'stats' }, stat(posts.length, '게시물'), stat(P.followers, '팔로워'), stat(P.following, '팔로잉'))),
     h('div', { style: 'padding:0 16px' }, h('b', { text: P.name }), h('div', { class: 'bio', text: P.bio })),
-    h('div', { class: 'pbtns' }, h('button', { text: '프로필 편집', onclick: () => nav.push('insta', 'editprofile', {}) }), h('button', { text: '게시물 추가', onclick: () => nav.push('insta', 'newpost', {}) })),
+    h('div', { class: 'pbtns' }, h('button', { text: '프로필 편집', onclick: () => nav.push('insta', 'editprofile', {}) }), h('button', { text: '게시물 추가', onclick: () => U.owner && nav.push('insta', 'newpost', {}) })),
     h('div', { class: 'gtabs' }, ic('grid', 24)),
     h('div', { class: 'pgrid' }, posts.map(po => h('button', { class: 'pcell', 'aria-label': '게시물 열기', style: `background-image:url(${po.imgs[0]})`, onclick: () => nav.push('insta', 'post', { id: po.id }) }, po.imgs.length > 1 ? h('span', { class: 'multi' }, ic('grid', 16)) : null))));
   if (!posts.length) sc.append(h('div', { class: 'empty', text: '아직 게시물이 없어요.' }));
@@ -1815,6 +1815,7 @@ VIEWS['insta.editprofile'] = () => {
     h('div', { class: 'scroll' }, box, field('사용자 이름', un), field('이름', nm), field('소개', bio), field('팔로워 수', fo), field('팔로잉 수', fg)));
 };
 VIEWS['insta.newpost'] = p => {
+  if (!U.owner) { setTimeout(() => nav.back(), 0); return h('div'); }
   let by = p.by || null, imgs = []; const strip = h('div', { class: 'pstrip' }), cap = h('textarea', { id: 'npcap', rows: 3, placeholder: '문구를 입력하세요...' }), lk = h('input', { id: 'nplikes', type: 'number', min: 0, value: 0 });
   const te = timeEditor(absNow(), '게시 시간');
   const draw = () => { strip.innerHTML = ''; imgs.forEach((s, i) => strip.append(h('div', { class: 'pth', style: `background-image:url(${s})` }, h('button', { 'aria-label': '삭제', onclick: () => { imgs.splice(i, 1); draw(); } }, ic('x', 14))))); strip.append(h('button', { class: 'padd', onclick: () => pickImages({ multiple: true, max: 1080 }, u => { imgs.push(...u); draw(); }) }, ic('plus', 28), h('small', { text: imgs.length ? '더 추가' : '사진 선택' }))); };
@@ -1972,7 +1973,7 @@ VIEWS['insta.user'] = p => {
   const sc = h('div', { class: 'scroll' },
     h('div', { class: 'phd' }, ringAvatar(f.avatar, f.username, hasS, 86, () => hasS ? nav.push('insta', 'story', { by: f.id, i: 0 }) : null), h('div', { class: 'stats' }, stat(posts.length, '게시물'), stat(f.followers, '팔로워'), stat(f.following, '팔로잉'))),
     h('div', { style: 'padding:0 16px' }, h('b', { text: f.name }), h('div', { class: 'bio', text: f.bio })),
-    h('div', { class: 'pbtns' }, followB, h('button', { text: '메시지', onclick: dmOpen }), h('button', { text: '게시물 추가', onclick: () => nav.push('insta', 'newpost', { by: f.id }) })),
+    h('div', { class: 'pbtns' }, followB, h('button', { text: '메시지', onclick: dmOpen }), h('button', { text: '게시물 추가', onclick: () => U.owner && nav.push('insta', 'newpost', { by: f.id }) })),
     h('div', { class: 'gtabs' }, ic('grid', 24)),
     h('div', { class: 'pgrid' }, posts.map(po => h('button', { class: 'pcell', 'aria-label': '게시물 열기', style: `background-image:url(${po.imgs[0]})`, onclick: () => nav.push('insta', 'post', { id: po.id }) }, po.imgs.length > 1 ? h('span', { class: 'multi' }, ic('grid', 16)) : null))));
   if (!posts.length) sc.append(h('div', { class: 'empty', text: '아직 게시물이 없어요.' }));
