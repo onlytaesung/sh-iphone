@@ -921,7 +921,7 @@ VIEWS['lock.main'] = () => {
   const notifs = lockNotifs();
   const el = h('div', { class: 'lock' + (S.wall.clock === 'small' ? ' small' : '') },
     h('div', { class: 'ldate', id: 'ldate', text: `${n.getMonth() + 1}월 ${n.getDate()}일 ${DAYS[n.getDay()]}` }),
-    h('div', { class: 'ltime', id: 'ltime', text: `${n.getHours()}:${p2(n.getMinutes())}` }),
+    h('div', { class: 'ltime', id: 'ltime', text: `${n.getHours() % 12 || 12}:${p2(n.getMinutes())}` }),
     notifs.length ? h('div', { class: 'lnotifs' }, notifs.map(x => h('div', { class: 'lnotif' }, (x.app ? appTileEl(x.app) : h('span', { class: 'ni', style: `background:${x.bg}` }, ic(x.ic, 20))), h('div', { class: 'nt' }, h('b', { text: x.title }), h('span', { text: x.text })), h('small', { text: fmtList(x.t) })))) : null,
     h('div', { class: 'lbottom' },
       h('div', { class: 'lbtn' }, h('span', { html: '<svg class="ic" viewBox="0 0 24 24" style="width:22px;height:22px"><path d="M9 2.500h6l-1 4 1.500 2v13a1.500 1.500 0 01-1.500 1.500h-5A1.500 1.500 0 018.500 21.500v-13L10 6.500z" fill="currentColor" stroke="none"/></svg>', style: 'display:flex' }).firstChild),
@@ -2134,7 +2134,7 @@ function buildShell() {
 function tick() {
   const n = new Date();
   const sc = $('#sclock'); if (sc) sc.textContent = `${n.getHours() % 12 || 12}:${p2(n.getMinutes())}`;
-  const lt = $('#ltime'); if (lt) lt.textContent = `${n.getHours()}:${p2(n.getMinutes())}`;
+  const lt = $('#ltime'); if (lt) lt.textContent = `${n.getHours() % 12 || 12}:${p2(n.getMinutes())}`;
   const ld = $('#ldate'); if (ld) ld.textContent = `${n.getMonth() + 1}월 ${n.getDate()}일 ${DAYS[n.getDay()]}`;
   document.querySelectorAll('[data-tz]').forEach(e => { e.textContent = tzTime(e.dataset.tz); });
 }
