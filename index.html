@@ -967,7 +967,6 @@ function weatherWidget() {
 }
 VIEWS['home.main'] = () => {
   const el = h('div', { class: 'home' },
-    weatherWidget(),
     h('div', { class: 'igrid' }, ['notes', 'voice', 'clock', 'camera', 'insta'].map(a => appIcon(a))),
     h('button', { class: 'spot', onclick: () => nav.push('home', 'search', {}) }, ic('search', 14), '검색'),
     h('div', { class: 'dock' }, ['phone', 'contacts', 'messages', 'gallery'].map(a => appIcon(a, 'dock'))));
